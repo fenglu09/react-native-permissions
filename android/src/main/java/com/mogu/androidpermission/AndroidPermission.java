@@ -15,7 +15,6 @@ import com.facebook.react.bridge.ReactMethod;
 
 public class AndroidPermission extends ReactContextBaseJavaModule {
 
-
     public AndroidPermission(ReactApplicationContext reactContext) {
         super(reactContext);
     }
@@ -28,19 +27,21 @@ public class AndroidPermission extends ReactContextBaseJavaModule {
     @ReactMethod
     public void check(String permission, Promise promise) {
 
-        if (Build.VERSION.SDK_INT > 23) {
-            //  Android 6.0+
-            int result = ContextCompat.checkSelfPermission(getCurrentActivity(), permission);
-            promise.resolve(result == PackageManager.PERMISSION_GRANTED);
-        } else {
-            // Android 6.0 以下
-            int result = PermissionChecker.checkSelfPermission(getCurrentActivity(), permission);
-            promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
+        // 暂时解决权限问题
+        int result = PermissionChecker.checkSelfPermission(getCurrentActivity(), permission);
+        promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
+        // if (Build.VERSION.SDK_INT > 23) {
+        //     //  Android 6.0+
+        //     int result = ContextCompat.checkSelfPermission(getCurrentActivity(), permission);
+        //     promise.resolve(result == PackageManager.PERMISSION_GRANTED);
+        // } else {
+        //     // Android 6.0 以下
+        //     int result = PermissionChecker.checkSelfPermission(getCurrentActivity(), permission);
+        //     promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
 
-        }
+        // }
 
     }
-
 
     /*
     跳转权限设置
@@ -50,7 +51,6 @@ public class AndroidPermission extends ReactContextBaseJavaModule {
         try {
             String name = Build.MANUFACTURER.toString().trim().toUpperCase();
             Context context = getCurrentActivity();
-
 
             if (name.equals("MEIZU")) {
                 //魅族
@@ -65,7 +65,6 @@ public class AndroidPermission extends ReactContextBaseJavaModule {
         }
     }
 
-
     public void getAppDetailSettingIntent(Context context, Promise promise) {
 
         Intent localIntent = new Intent();
@@ -79,8 +78,7 @@ public class AndroidPermission extends ReactContextBaseJavaModule {
             localIntent.putExtra("com.android.settings.ApplicationPkgName", context.getPackageName());
         }
 
-
-        if (localIntent.resolveActivity(context.getPackageManager()) != null) {  //存在
+        if (localIntent.resolveActivity(context.getPackageManager()) != null) { //存在
             context.startActivity(localIntent);
             promise.resolve(true);
         } else {//不存在
@@ -95,10 +93,10 @@ public class AndroidPermission extends ReactContextBaseJavaModule {
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.putExtra("packageName", BuildConfig.APPLICATION_ID);
 
-        if (intent.resolveActivity(context.getPackageManager()) != null) {  //存在
+        if (intent.resolveActivity(context.getPackageManager()) != null) { //存在
             context.startActivity(intent);
             promise.resolve(true);
-        } else {    //不存在
+        } else { //不存在
             getAppDetailSettingIntent(context, promise);
             promise.reject("-1", "打开失败");
         }
