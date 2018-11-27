@@ -19,6 +19,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
 public class AndroidPermission extends ReactContextBaseJavaModule {
+    public static Promise promise = null;
 
     public AndroidPermission(ReactApplicationContext reactContext) {
         super(reactContext);
