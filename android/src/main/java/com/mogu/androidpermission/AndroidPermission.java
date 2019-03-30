@@ -1,11 +1,10 @@
 package com.mogu.androidpermission;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.PermissionChecker;
 
 import com.facebook.react.bridge.Promise;
@@ -26,6 +25,21 @@ public class AndroidPermission extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void check(String permission, Promise promise) {
+
+        /** add by david  at 2019-03-11 start*/
+        //  解决oppo手机不管授权与否都会 返回PackageManager.PERMISSION_GRANTED（已授权)
+        if (RomUtils.isOppo()) {
+            if (permission.equals(Manifest.permission.CAMERA)) {
+                promise.resolve(RomUtils.checkCameraPermissions());
+                return;
+            }
+            if (permission.equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                promise.resolve(RomUtils.checkLocationsPermission(getCurrentActivity()));
+                return;
+            }
+        }
+        /** add by david  at 2019-03-11 end*/
+
 
         // 暂时解决权限问题
         int result = PermissionChecker.checkSelfPermission(getCurrentActivity(), permission);
