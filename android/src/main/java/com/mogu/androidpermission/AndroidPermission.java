@@ -4,25 +4,16 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.PermissionChecker;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-
-import java.util.List;
 
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -98,11 +89,20 @@ public class AndroidPermission extends ReactContextBaseJavaModule {
             String tip = "请允许开启相关权限";
 
             if (EasyPermissions.hasPermissions(context, perms)) {
+                for (int i = 0; i < perms.length; i++) {
+                    int permission_result = PermissionChecker.checkPermission(context, perms[i], android.os.Process.myPid(), android.os.Process.myUid(), context.getPackageName());
+                    if (permission_result != PermissionChecker.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions((Activity) context, perms, 100);
+                        return;
+                    }
+                }
                 promise.resolve(true);
             } else {
                 permissionNum = perms.length;
-                EasyPermissions.requestPermissions((Activity) context, tip,
-                        RC_CAMERA_PERM, perms);
+                // EasyPermissions.requestPermissions((Activity) context, tip,
+                //         RC_CAMERA_PERM, perms);
+                ActivityCompat.requestPermissions((Activity) context, perms, 100);
+
             }
         } catch (Exception e) {
             promise.reject("-1", "检测失败");
