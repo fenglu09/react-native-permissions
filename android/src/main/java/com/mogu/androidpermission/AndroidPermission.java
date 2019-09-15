@@ -31,54 +31,9 @@ public class AndroidPermission extends ReactContextBaseJavaModule {
         return "AndroidPermission";
     }
 
-//    @ReactMethod
-//    public void check(String permission, Promise promise) {
-//
-//        // 暂时解决权限问题
-//        int result = PermissionChecker.checkSelfPermission(getCurrentActivity(), permission);
-//        promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
-//        // if (Build.VERSION.SDK_INT > 23) {
-//        //     //  Android 6.0+
-//        //     int result = ContextCompat.checkSelfPermission(getCurrentActivity(), permission);
-//        //     promise.resolve(result == PackageManager.PERMISSION_GRANTED);
-//        // } else {
-//        //     // Android 6.0 以下
-//        //     int result = PermissionChecker.checkSelfPermission(getCurrentActivity(), permission);
-//        //     promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
-//
-//        // }
-//
-//    }
-
     // targetSdkVersion 26 权限申请 start
     @ReactMethod
     public void check(String permission, Promise promise) {
-//        try {
-//            Context context = getCurrentActivity();
-//            SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
-//            boolean firstRequest = sharedPreferences.getBoolean(permission, true);
-//            this.promise = promise;
-//            int result = PermissionChecker.checkSelfPermission(getCurrentActivity(), permission);
-//            if (result != PermissionChecker.PERMISSION_GRANTED) {
-//                if (firstRequest) {
-//                    ActivityCompat.requestPermissions(getCurrentActivity(), new String[]{permission},
-//                            100);
-//                    SharedPreferences.Editor editor = sharedPreferences.edit();
-//                    editor.putBoolean(permission, false);
-//                    editor.commit();
-//                } else {
-//                    promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
-//                }
-//            } else {
-//                promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
-//            }
-//
-//        } catch (Exception e) {
-//            promise.reject("-1", "检测失败");
-//        }
-        //add by david 动态申请权限 end
-        //promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
-
         try {
             Context context = getCurrentActivity();
             this.promise = promise;
