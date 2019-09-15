@@ -1,10 +1,13 @@
 package com.mogu.androidpermission;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.PermissionChecker;
 
 import com.facebook.react.bridge.Promise;
@@ -12,7 +15,12 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
+import pub.devrel.easypermissions.EasyPermissions;
+
 public class AndroidPermission extends ReactContextBaseJavaModule {
+    public static Promise promise = null;
+    private static final int RC_CAMERA_PERM = 123;
+    public static int permissionNum = 0;
 
     public AndroidPermission(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -23,39 +31,96 @@ public class AndroidPermission extends ReactContextBaseJavaModule {
         return "AndroidPermission";
     }
 
+//    @ReactMethod
+//    public void check(String permission, Promise promise) {
+//
+//        // 暂时解决权限问题
+//        int result = PermissionChecker.checkSelfPermission(getCurrentActivity(), permission);
+//        promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
+//        // if (Build.VERSION.SDK_INT > 23) {
+//        //     //  Android 6.0+
+//        //     int result = ContextCompat.checkSelfPermission(getCurrentActivity(), permission);
+//        //     promise.resolve(result == PackageManager.PERMISSION_GRANTED);
+//        // } else {
+//        //     // Android 6.0 以下
+//        //     int result = PermissionChecker.checkSelfPermission(getCurrentActivity(), permission);
+//        //     promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
+//
+//        // }
+//
+//    }
+
+    // targetSdkVersion 26 权限申请 start
     @ReactMethod
     public void check(String permission, Promise promise) {
+//        try {
+//            Context context = getCurrentActivity();
+//            SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+//            boolean firstRequest = sharedPreferences.getBoolean(permission, true);
+//            this.promise = promise;
+//            int result = PermissionChecker.checkSelfPermission(getCurrentActivity(), permission);
+//            if (result != PermissionChecker.PERMISSION_GRANTED) {
+//                if (firstRequest) {
+//                    ActivityCompat.requestPermissions(getCurrentActivity(), new String[]{permission},
+//                            100);
+//                    SharedPreferences.Editor editor = sharedPreferences.edit();
+//                    editor.putBoolean(permission, false);
+//                    editor.commit();
+//                } else {
+//                    promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
+//                }
+//            } else {
+//                promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
+//            }
+//
+//        } catch (Exception e) {
+//            promise.reject("-1", "检测失败");
+//        }
+        //add by david 动态申请权限 end
+        //promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
 
-        /** add by david  at 2019-03-11 start*/
-        //  解决oppo手机不管授权与否都会 返回PackageManager.PERMISSION_GRANTED（已授权)
-        if (RomUtils.isOppo()) {
+        try {
+            Context context = getCurrentActivity();
+            this.promise = promise;
+            String[] perms = {permission};
             if (permission.equals(Manifest.permission.CAMERA)) {
-                promise.resolve(RomUtils.checkCameraPermissions());
-                return;
+                perms = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
             }
-            if (permission.equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                promise.resolve(RomUtils.checkLocationsPermission(getCurrentActivity()));
-                return;
+            String tip = "请允许开启相关权限";
+
+            if (EasyPermissions.hasPermissions(context, perms)) {
+                for (int i = 0; i < perms.length; i++) {
+                    int permission_result = PermissionChecker.checkPermission(context, perms[i], android.os.Process.myPid(), android.os.Process.myUid(), context.getPackageName());
+                    if (permission_result != PermissionChecker.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions((Activity) context, perms, 100);
+                        return;
+                    }
+                }
+                promise.resolve(true);
+            } else {
+                permissionNum = perms.length;
+                // EasyPermissions.requestPermissions((Activity) context, tip,
+                //         RC_CAMERA_PERM, perms);
+                ActivityCompat.requestPermissions((Activity) context, perms, 100);
+
             }
+        } catch (Exception e) {
+            promise.reject("-1", "检测失败");
         }
-        /** add by david  at 2019-03-11 end*/
-
-
-        // 暂时解决权限问题
-        int result = PermissionChecker.checkSelfPermission(getCurrentActivity(), permission);
-        promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
-        // if (Build.VERSION.SDK_INT > 23) {
-        //     //  Android 6.0+
-        //     int result = ContextCompat.checkSelfPermission(getCurrentActivity(), permission);
-        //     promise.resolve(result == PackageManager.PERMISSION_GRANTED);
-        // } else {
-        //     // Android 6.0 以下
-        //     int result = PermissionChecker.checkSelfPermission(getCurrentActivity(), permission);
-        //     promise.resolve(result == PermissionChecker.PERMISSION_GRANTED);
-
-        // }
-
     }
+
+
+    @ReactMethod
+    public void openNetWorkSettings(Promise promise) {
+        try {
+            getCurrentActivity().startActivity(new Intent(Settings.ACTION_SETTINGS));
+        } catch (Exception e) {
+            promise.reject("-1", "打开失败");
+        }
+    }
+
+    // targetSdkVersion 26 权限申请 end
+
 
     /*
     跳转权限设置
