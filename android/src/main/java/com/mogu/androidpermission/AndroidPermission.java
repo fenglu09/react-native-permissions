@@ -32,6 +32,9 @@ public class AndroidPermission extends ReactContextBaseJavaModule {
         return "AndroidPermission";
     }
 
+    public static Boolean hasPermissions(Context context,String[] permissions){
+        return EasyPermissions.hasPermissions(context, permissions);
+    }
 //    @ReactMethod
 //    public void check(String permission, Promise promise) {
 //
